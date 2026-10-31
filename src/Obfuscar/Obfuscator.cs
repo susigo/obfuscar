@@ -136,6 +136,18 @@ namespace Obfuscar
             LoggerService.Logger.LogInformation("Types...");
             RenameTypes();
 
+            if (Project.Settings.InjectBait)
+            {
+                LoggerService.Logger.LogInformation("Injecting bait...");
+                InjectBaitAssemblies();
+            }
+
+            if (Project.Settings.FlattenControlFlow)
+            {
+                LoggerService.Logger.LogInformation("Flattening control flow...");
+                FlattenControlFlowAssemblies();
+            }
+
             PostProcessing();
 
             LoggerService.Logger.LogInformation("Done.\n");
@@ -1840,6 +1852,22 @@ namespace Obfuscar
         /// <summary>
         /// Encoded strings using an auto-generated class.
         /// </summary>
+        internal void InjectBaitAssemblies()
+        {
+            foreach (AssemblyInfo info in Project.AssemblyList)
+            {
+                new BaitInjector(info.Definition, Project.Settings).Inject();
+            }
+        }
+
+        internal void FlattenControlFlowAssemblies()
+        {
+            foreach (AssemblyInfo info in Project.AssemblyList)
+            {
+                new ControlFlowFlattener(info.Definition, Project.Settings).Flatten();
+            }
+        }
+
         internal void HideStrings()
         {
             foreach (AssemblyInfo info in Project.AssemblyList)

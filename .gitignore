@@ -1,4 +1,6 @@
-build/
+build/*
+!build/obfuscar.props
+!build/Encode-BaitText.ps1
 *.suo
 *.user
 _ReSharper*

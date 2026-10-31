@@ -83,6 +83,20 @@ namespace Obfuscar
             
             CustomAttributesToPreservePropertyNames = vars.GetValue("CustomAttributesToPreservePropertyNames", "")
                 .Split(';').Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray();
+
+            InjectBait = XmlConvert.ToBoolean(vars.GetValue("InjectBait", "false"));
+            BaitTypeCount = Math.Max(0, XmlConvert.ToInt32(vars.GetValue("BaitTypeCount", "120")));
+            BaitMethodsPerType = Math.Max(1, XmlConvert.ToInt32(vars.GetValue("BaitMethodsPerType", "8")));
+            BaitFieldsPerType = Math.Max(0, XmlConvert.ToInt32(vars.GetValue("BaitFieldsPerType", "3")));
+            BaitSeed = XmlConvert.ToInt32(vars.GetValue("BaitSeed", "-1"));
+            BaitWordList = vars.GetValue("BaitWordList", "")
+                .Split(';').Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray();
+            BaitStringEncoding = vars.GetValue("BaitStringEncoding", "plain").Trim().ToLowerInvariant();
+            BaitIntoMethods = XmlConvert.ToBoolean(vars.GetValue("BaitIntoMethods", "true"));
+            BaitSensitive = XmlConvert.ToBoolean(vars.GetValue("BaitSensitive", "true"));
+
+            FlattenControlFlow = XmlConvert.ToBoolean(vars.GetValue("FlattenControlFlow", "false"));
+            CffMinInstructions = Math.Max(4, XmlConvert.ToInt32(vars.GetValue("CffMinInstructions", "12")));
         }
 
         public bool RegenerateDebugInfo { get; }
@@ -130,5 +144,27 @@ namespace Obfuscar
         public string CustomChars { get; }
         
         public string[] CustomAttributesToPreservePropertyNames { get; set; }
+
+        public bool InjectBait { get; }
+
+        public int BaitTypeCount { get; }
+
+        public int BaitMethodsPerType { get; }
+
+        public int BaitFieldsPerType { get; }
+
+        public int BaitSeed { get; }
+
+        public string[] BaitWordList { get; }
+
+        public string BaitStringEncoding { get; }
+
+        public bool BaitIntoMethods { get; }
+
+        public bool BaitSensitive { get; }
+
+        public bool FlattenControlFlow { get; }
+
+        public int CffMinInstructions { get; }
     }
 }

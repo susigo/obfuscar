@@ -42,6 +42,8 @@
     <Compile Include="AnonymousTypePropertyTests.cs" />
     <Compile Include="AttributeTests.cs" />
     <Compile Include="AutoSkipTypeTests.cs" />
+    <Compile Include="BaitInjectionTests.cs" />
+    <Compile Include="ControlFlowFlattenTests.cs" />
     <Compile Include="BamlTests.cs" />
     <Compile Include="CleanPoolTests.cs" />
     <Compile Include="CollectionExpressionTests.cs" />

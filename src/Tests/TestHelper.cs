@@ -332,6 +332,10 @@ namespace ObfuscarTests
             obfuscator.RenameEvents();
             obfuscator.RenameMethods();
             obfuscator.RenameTypes();
+            if (obfuscator.Project.Settings.InjectBait)
+                obfuscator.InjectBaitAssemblies();
+            if (obfuscator.Project.Settings.FlattenControlFlow)
+                obfuscator.FlattenControlFlowAssemblies();
             obfuscator.PostProcessing();
             obfuscator.SaveAssemblies(true);
 
