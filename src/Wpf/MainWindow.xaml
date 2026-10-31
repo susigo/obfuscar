@@ -1,0 +1,473 @@
+<Window x:Class="Obfuscar.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
+        Title="{DynamicResource App_Title}" Width="1700" Height="1000"
+        MinWidth="1240" MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="CanResize"
+        Background="{StaticResource BgWindow}"
+        Foreground="{StaticResource TextPrimary}"
+        FontFamily="Segoe UI" FontSize="13"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="38" ResizeBorderThickness="6"
+                      GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="38"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="28"/>
+        </Grid.RowDefinitions>
+
+        <!-- title bar -->
+        <Border Grid.Row="0" Background="{StaticResource BgPanel}"
+                BorderBrush="{StaticResource BorderSoftBrush}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <ComboBox x:Name="LanguageBox" Width="104" Height="26" Margin="0,0,12,0"
+                              VerticalAlignment="Center" FontSize="12"
+                              WindowChrome.IsHitTestVisibleInChrome="True"
+                              ToolTip="{DynamicResource Tip_Language}"
+                              SelectionChanged="OnLanguageSelectionChanged">
+                        <ComboBoxItem Content="中文"/>
+                        <ComboBoxItem Content="English"/>
+                    </ComboBox>
+                    <Button Style="{StaticResource CaptionButton}" Click="OnMinimize"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            ToolTip="{DynamicResource Tip_Minimize}">
+                        <Path Data="M0,0 H10" StrokeThickness="1"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    </Button>
+                    <Button Style="{StaticResource CaptionButton}" Click="OnMaximize"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            ToolTip="{DynamicResource Tip_Maximize}">
+                        <Path Data="M0,0 H10 V10 H0 Z" StrokeThickness="1"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    </Button>
+                    <Button Style="{StaticResource CloseCaptionButton}" Click="OnClose"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            ToolTip="{DynamicResource Tip_Close}">
+                        <Path Data="M0,0 L10,10 M10,0 L0,10" StrokeThickness="1.2"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <Border Width="9" Height="9" CornerRadius="2" Background="{StaticResource Accent}"
+                            VerticalAlignment="Center" Margin="0,0,11,0"/>
+                    <TextBlock Text="OBFUSCAR" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="{DynamicResource App_Subtitle}" Foreground="{StaticResource TextFaint}"
+                               FontSize="11.5" VerticalAlignment="Center" Margin="10,1,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- toolbar -->
+        <Border Grid.Row="1" Background="{StaticResource BgWindow}"
+                BorderBrush="{StaticResource BorderSoftBrush}" BorderThickness="0,0,0,1">
+            <DockPanel Margin="14,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="RunButton" Style="{StaticResource PrimaryButton}"
+                            Click="OnRun" Width="168" ToolTip="{DynamicResource Tip_Run}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="▶" FontSize="11" Margin="0,0,9,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Tool_Obfuscate}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ToolButton}" Click="OnRevealOutput" Margin="8,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                       Margin="0,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Tool_RevealOutput}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Border Width="1" Height="20" Background="{StaticResource BorderBrush}" Margin="12,0"/>
+                    <Button Style="{StaticResource ToolButton}" Click="OnOpenProject"
+                            ToolTip="{DynamicResource Tip_OpenProject}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                       Margin="0,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Tool_OpenProject}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ToolButton}" Click="OnSaveProject" Margin="6,0,0,0"
+                            ToolTip="{DynamicResource Tip_SaveProject}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                       Margin="0,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Tool_SaveProject}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border x:Name="RunPulse" Width="160" Height="2" Visibility="Collapsed"
+                            ClipToBounds="True" Background="{StaticResource BorderSoftBrush}"
+                            VerticalAlignment="Center" Margin="0,0,10,0">
+                        <Rectangle Fill="{StaticResource Accent}" Height="2" Width="56" HorizontalAlignment="Left">
+                            <Rectangle.RenderTransform>
+                                <TranslateTransform X="-56"/>
+                            </Rectangle.RenderTransform>
+                            <Rectangle.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                From="-56" To="160" Duration="0:0:1.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Rectangle.Triggers>
+                        </Rectangle>
+                    </Border>
+                    <TextBlock x:Name="RunStateText" Foreground="{StaticResource TextFaint}"
+                               FontSize="11.5" VerticalAlignment="Center"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="430" MinWidth="390"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="280"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- left: setup -->
+            <Border BorderBrush="{StaticResource BorderSoftBrush}" BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Margin="10,0,10,10" Height="196">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                                <TextBlock Style="{StaticResource SectionTitle}" Text="{DynamicResource Sec_Log}"/>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Style="{StaticResource GhostButton}" Content="{DynamicResource Btn_Copy}"
+                                            Click="OnCopyLog"/>
+                                    <Button Style="{StaticResource GhostButton}" Content="{DynamicResource Btn_Clear}"
+                                            Click="OnClearLog"/>
+                                </StackPanel>
+                            </DockPanel>
+                            <Grid>
+                                <TextBlock x:Name="LogEmpty" Text="{DynamicResource Log_Empty}"
+                                           Foreground="{StaticResource TextFaint}" FontSize="11.5"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           IsHitTestVisible="False"/>
+                                <ListBox x:Name="LogList" Background="{StaticResource ConsoleBg}"
+                                         BorderThickness="0" FontFamily="Consolas" FontSize="11">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Text}" TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Text}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#FFB9C1D1"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                                <Setter Property="Foreground" Value="#FFF14C4C"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Level}" Value="Warning">
+                                                                <Setter Property="Foreground" Value="#FFD7BA7D"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Level}" Value="Debug">
+                                                                <Setter Property="Foreground" Value="#FF78829A"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Level}" Value="Trace">
+                                                                <Setter Property="Foreground" Value="#FF667080"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </DockPanel>
+                    </Border>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,10,0,10">
+                        <StackPanel Margin="10,0,10,10">
+                            <!-- modules -->
+                            <Border Style="{StaticResource Card}">
+                                <StackPanel>
+                                    <DockPanel>
+                                        <TextBlock Style="{StaticResource SectionTitle}"
+                                                   Text="{DynamicResource Sec_Modules}"/>
+                                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource IconButton}" Content="&#xE710;"
+                                                    ToolTip="{DynamicResource Tip_AddAssemblies}" Click="OnAddModules"/>
+                                            <Button Style="{StaticResource IconButton}" Content="&#xE74D;"
+                                                    ToolTip="{DynamicResource Tip_RemoveSelected}" Click="OnRemoveModule"
+                                                    Margin="2,0,0,0"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                    <ListBox x:Name="ModulesList" Height="150" Margin="0,10,0,0"
+                                             SelectionChanged="OnModuleSelected">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding}"/>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- paths -->
+                            <Border Style="{StaticResource Card}" Margin="0,10,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                               Text="{DynamicResource Lbl_InputDir}" Margin="0,0,12,6"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,6"
+                                             Text="{Binding InPath, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                               Text="{DynamicResource Lbl_OutputDir}"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1"
+                                             Text="{Binding OutPath, UpdateSourceTrigger=PropertyChanged}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- rename -->
+                            <Border Style="{StaticResource Card}" Margin="0,10,0,0">
+                                <Expander Style="{StaticResource SectionExpander}"
+                                          Header="{DynamicResource Sec_Rename}" IsExpanded="True">
+                                    <UniformGrid Columns="2">
+                                        <CheckBox Content="{DynamicResource Opt_RenameFields}" IsChecked="{Binding RenameFields}"/>
+                                        <CheckBox Content="{DynamicResource Opt_RenameProperties}" IsChecked="{Binding RenameProperties}"/>
+                                        <CheckBox Content="{DynamicResource Opt_RenameEvents}" IsChecked="{Binding RenameEvents}"/>
+                                        <CheckBox Content="{DynamicResource Opt_KeepProperties}" IsChecked="{Binding KeepProperties}"/>
+                                        <CheckBox Content="{DynamicResource Opt_KeepPublicApi}" IsChecked="{Binding KeepPublicApi}"/>
+                                        <CheckBox Content="{DynamicResource Opt_HidePrivateApi}" IsChecked="{Binding HidePrivateApi}"/>
+                                        <CheckBox Content="{DynamicResource Opt_ReuseNames}" IsChecked="{Binding ReuseNames}"/>
+                                        <CheckBox Content="{DynamicResource Opt_UseUnicodeNames}" IsChecked="{Binding UseUnicodeNames}"/>
+                                        <CheckBox Content="{DynamicResource Opt_UseKoreanNames}" IsChecked="{Binding UseKoreanNames}"/>
+                                        <CheckBox Content="{DynamicResource Opt_MarkedOnly}" IsChecked="{Binding MarkedOnly}"/>
+                                    </UniformGrid>
+                                </Expander>
+                            </Border>
+
+                            <!-- strings -->
+                            <Border Style="{StaticResource Card}" Margin="0,10,0,0">
+                                <Expander Style="{StaticResource SectionExpander}"
+                                          Header="{DynamicResource Sec_Strings}" IsExpanded="True">
+                                    <StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <CheckBox Content="{DynamicResource Opt_HideStrings}" IsChecked="{Binding HideStrings}"/>
+                                            <CheckBox Content="{DynamicResource Opt_OptimizeMethods}" IsChecked="{Binding Optimize}"/>
+                                            <CheckBox Content="{DynamicResource Opt_SuppressIldasm}" IsChecked="{Binding SuppressIldasm}"/>
+                                            <CheckBox Content="{DynamicResource Opt_RegenDebugInfo}" IsChecked="{Binding RegenerateDebugInfo}"/>
+                                            <CheckBox Content="{DynamicResource Opt_XmlMapping}" IsChecked="{Binding XmlMapping}"/>
+                                            <CheckBox Content="{DynamicResource Opt_AnalyzeXaml}" IsChecked="{Binding AnalyzeXaml}"/>
+                                            <CheckBox Content="{DynamicResource Opt_SkipGenerated}" IsChecked="{Binding SkipGenerated}"/>
+                                            <CheckBox Content="{DynamicResource Opt_SkipSpecialName}" IsChecked="{Binding SkipSpecialName}"/>
+                                        </UniformGrid>
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                                       Text="{DynamicResource Lbl_CustomChars}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding CustomChars, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Expander>
+                            </Border>
+
+                            <!-- bait -->
+                            <Border Style="{StaticResource Card}" Margin="0,10,0,0">
+                                <Expander Style="{StaticResource SectionExpander}"
+                                          Header="{DynamicResource Sec_Bait}" IsExpanded="True">
+                                    <StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <CheckBox Content="{DynamicResource Opt_InjectBait}" IsChecked="{Binding InjectBait}"/>
+                                            <CheckBox Content="{DynamicResource Opt_BaitSensitive}" IsChecked="{Binding BaitSensitive}"/>
+                                            <CheckBox Content="{DynamicResource Opt_BaitIntoMethods}" IsChecked="{Binding BaitIntoMethods}"/>
+                                        </UniformGrid>
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                                       Text="{DynamicResource Lbl_TypeCount}" Margin="0,0,0,6"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Width="78" Margin="0,0,0,6"
+                                                     Text="{Binding BaitTypeCount, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                                       Text="{DynamicResource Lbl_MethodsPerType}" Margin="0,0,0,6"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Width="78" Margin="0,0,0,6"
+                                                     Text="{Binding BaitMethodsPerType, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                                       Text="{DynamicResource Lbl_FieldsPerType}" Margin="0,0,0,6"/>
+                                            <TextBox Grid.Row="2" Grid.Column="1" Width="78" Margin="0,0,0,6"
+                                                     Text="{Binding BaitFieldsPerType, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                                       Text="{DynamicResource Lbl_Seed}" Margin="0,0,0,6"/>
+                                            <TextBox Grid.Row="3" Grid.Column="1" Width="78" Margin="0,0,0,6"
+                                                     Text="{Binding BaitSeed, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                                       Text="{DynamicResource Lbl_StringEncoding}"/>
+                                            <ComboBox Grid.Row="4" Grid.Column="1" Width="112"
+                                                      SelectedValuePath="Content"
+                                                      SelectedValue="{Binding BaitStringEncoding}">
+                                                <ComboBoxItem Content="plain"/>
+                                                <ComboBoxItem Content="base64"/>
+                                                <ComboBoxItem Content="mixed"/>
+                                            </ComboBox>
+                                        </Grid>
+                                        <TextBlock Text="{DynamicResource Lbl_WordList}"
+                                                   Foreground="{StaticResource TextFaint}" FontSize="11.5"
+                                                   Margin="0,10,0,5"/>
+                                        <TextBox Text="{Binding BaitWordList, UpdateSourceTrigger=PropertyChanged}"
+                                                 TextWrapping="Wrap" MinHeight="52"/>
+                                    </StackPanel>
+                                </Expander>
+                            </Border>
+
+                            <!-- control flow -->
+                            <Border Style="{StaticResource Card}" Margin="0,10,0,0">
+                                <Expander Style="{StaticResource SectionExpander}"
+                                          Header="{DynamicResource Sec_ControlFlow}" IsExpanded="True">
+                                    <StackPanel>
+                                        <CheckBox Content="{DynamicResource Opt_FlattenControlFlow}" IsChecked="{Binding FlattenControlFlow}"/>
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Style="{StaticResource FieldLabel}"
+                                                       Text="{DynamicResource Lbl_MinInstructions}"/>
+                                            <TextBox Grid.Column="1" Width="78"
+                                                     Text="{Binding CffMinInstructions, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Expander>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="7" HorizontalAlignment="Stretch"/>
+
+            <!-- middle: original -->
+            <DockPanel Grid.Column="2">
+                <Border DockPanel.Dock="Top" BorderBrush="{StaticResource BorderSoftBrush}"
+                        BorderThickness="0,0,0,1" Padding="12,8" Background="{StaticResource BgPanelAlt}">
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="7" Height="7" Fill="{StaticResource Accent}"
+                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="OriginalTitle" Text="{DynamicResource Pane_Original}"
+                                       FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource GhostButton}" Content="{DynamicResource Btn_Copy}"
+                                    Click="OnCopyOriginal"/>
+                            <Button Style="{StaticResource GhostButton}" Content="{DynamicResource Btn_Wrap}"
+                                    Click="OnToggleWrapOriginal"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Grid>
+                    <avalon:TextEditor x:Name="OriginalEditor" IsReadOnly="True"
+                                       FontFamily="Consolas" FontSize="13"
+                                       ShowLineNumbers="True" WordWrap="False"
+                                       Background="{StaticResource EditorBg}"
+                                       Foreground="#FFD4D4D4"
+                                       LineNumbersForeground="#FF5A616E"
+                                       Padding="4,2"
+                                       VerticalScrollBarVisibility="Auto"
+                                       HorizontalScrollBarVisibility="Auto"/>
+                    <TextBlock x:Name="OriginalEmpty"
+                               Text="{DynamicResource Empty_Select}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{StaticResource TextFaint}" FontSize="13"
+                               IsHitTestVisible="False"/>
+                </Grid>
+            </DockPanel>
+
+            <GridSplitter Grid.Column="3" Width="7" HorizontalAlignment="Stretch"/>
+
+            <!-- right: obfuscated -->
+            <DockPanel Grid.Column="4">
+                <Border DockPanel.Dock="Top" BorderBrush="{StaticResource BorderSoftBrush}"
+                        BorderThickness="0,0,0,1" Padding="12,8" Background="{StaticResource BgPanelAlt}">
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="7" Height="7" Fill="{StaticResource Accent}"
+                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="ObfuscatedTitle" Text="{DynamicResource Pane_Obfuscated}"
+                                       FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource GhostButton}" Content="{DynamicResource Btn_Copy}"
+                                    Click="OnCopyObfuscated"/>
+                            <Button Style="{StaticResource GhostButton}" Content="{DynamicResource Btn_Wrap}"
+                                    Click="OnToggleWrapObfuscated"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Grid>
+                    <avalon:TextEditor x:Name="ObfuscatedEditor" IsReadOnly="True"
+                                       FontFamily="Consolas" FontSize="13"
+                                       ShowLineNumbers="True" WordWrap="False"
+                                       Background="{StaticResource EditorBg}"
+                                       Foreground="#FFD4D4D4"
+                                       LineNumbersForeground="#FF5A616E"
+                                       Padding="4,2"
+                                       VerticalScrollBarVisibility="Auto"
+                                       HorizontalScrollBarVisibility="Auto"/>
+                    <TextBlock x:Name="ObfuscatedEmpty"
+                               Text="{DynamicResource Empty_RunToCompare}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{StaticResource TextFaint}" FontSize="13"
+                               IsHitTestVisible="False"/>
+                </Grid>
+            </DockPanel>
+        </Grid>
+
+        <!-- status bar -->
+        <Border Grid.Row="3" Background="{StaticResource BgPanel}"
+                BorderBrush="{StaticResource BorderSoftBrush}" BorderThickness="0,1,0,0">
+            <DockPanel Margin="14,0">
+                <TextBlock x:Name="StatusText" Foreground="{StaticResource TextSecondary}" FontSize="11.5"
+                           VerticalAlignment="Center"/>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <TextBlock x:Name="ModulesCountText" Foreground="{StaticResource TextFaint}" FontSize="11.5"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="  ·  " Foreground="{StaticResource TextFaint}" FontSize="11.5"
+                               VerticalAlignment="Center"/>
+                    <TextBlock x:Name="ElapsedText" Foreground="{StaticResource TextFaint}" FontSize="11.5"
+                               VerticalAlignment="Center" Text="—"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

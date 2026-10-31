@@ -31,6 +31,10 @@
     <BuildType Solution="Debug|*" Project="Debug" />
     <BuildType Solution="Release|*" Project="Release" />
   </Project>
+  <Project Path="src/Wpf/Obfuscar.Wpf.csproj">
+    <BuildType Solution="Debug|*" Project="Debug" />
+    <BuildType Solution="Release|*" Project="Release" />
+  </Project>
   <Project Path="src/Tests/ObfuscarTests.csproj">
     <BuildType Solution="Debug|*" Project="Debug" />
     <BuildType Solution="Release|*" Project="Release" />

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SyntaxDefinition name="CSharp Dark" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="#6A9955" fontStyle="italic"/>
+    <Color name="String" foreground="#CE9178"/>
+    <Color name="Char" foreground="#CE9178"/>
+    <Color name="Preprocessor" foreground="#C586C0"/>
+    <Color name="Digits" foreground="#B5CEA8"/>
+    <Color name="Keywords" foreground="#569CD6"/>
+    <Color name="TypeNames" foreground="#4EC9B0"/>
+    <Color name="MethodCall" foreground="#DCDCAA"/>
+    <Color name="Attribute" foreground="#4EC9B0"/>
+    <RuleSet ignoreCase="false">
+        <Span color="Comment">
+            <Begin>//</Begin>
+        </Span>
+        <Span color="Comment" multiline="true">
+            <Begin>/\*</Begin>
+            <End>\*/</End>
+        </Span>
+        <Span color="Preprocessor">
+            <Begin>\#</Begin>
+        </Span>
+        <Span color="String">
+            <Begin>"</Begin>
+            <End>"</End>
+            <RuleSet>
+                <Rule>\\.</Rule>
+            </RuleSet>
+        </Span>
+        <Span color="Char">
+            <Begin>'</Begin>
+            <End>'</End>
+            <RuleSet>
+                <Rule>\\.</Rule>
+            </RuleSet>
+        </Span>
+        <Rule color="Attribute">\[[A-Za-z_][A-Za-z0-9_.]*(?!.*\])</Rule>
+        <Rule color="Digits">\b0[xX][0-9a-fA-F_]+|\b\d[\d_]*(\.\d+)?([eE][+-]?\d+)?[fFdDmMuUlL]*\b</Rule>
+        <Keywords color="Keywords">
+            <Word>abstract</Word><Word>as</Word><Word>base</Word><Word>bool</Word><Word>break</Word>
+            <Word>byte</Word><Word>case</Word><Word>catch</Word><Word>char</Word><Word>checked</Word>
+            <Word>class</Word><Word>const</Word><Word>continue</Word><Word>decimal</Word><Word>default</Word>
+            <Word>delegate</Word><Word>do</Word><Word>double</Word><Word>else</Word><Word>enum</Word>
+            <Word>event</Word><Word>explicit</Word><Word>extern</Word><Word>false</Word><Word>finally</Word>
+            <Word>fixed</Word><Word>float</Word><Word>for</Word><Word>foreach</Word><Word>goto</Word>
+            <Word>if</Word><Word>implicit</Word><Word>in</Word><Word>int</Word><Word>interface</Word>
+            <Word>internal</Word><Word>is</Word><Word>lock</Word><Word>long</Word><Word>namespace</Word>
+            <Word>new</Word><Word>null</Word><Word>object</Word><Word>operator</Word><Word>out</Word>
+            <Word>override</Word><Word>params</Word><Word>private</Word><Word>protected</Word><Word>public</Word>
+            <Word>readonly</Word><Word>ref</Word><Word>return</Word><Word>sbyte</Word><Word>sealed</Word>
+            <Word>short</Word><Word>sizeof</Word><Word>stackalloc</Word><Word>static</Word><Word>string</Word>
+            <Word>struct</Word><Word>switch</Word><Word>this</Word><Word>throw</Word><Word>true</Word>
+            <Word>try</Word><Word>typeof</Word><Word>uint</Word><Word>ulong</Word><Word>unchecked</Word>
+            <Word>unsafe</Word><Word>ushort</Word><Word>using</Word><Word>virtual</Word><Word>void</Word>
+            <Word>volatile</Word><Word>while</Word><Word>var</Word><Word>async</Word><Word>await</Word>
+            <Word>record</Word><Word>init</Word><Word>value</Word><Word>get</Word><Word>set</Word>
+            <Word>add</Word><Word>remove</Word><Word>nameof</Word><Word>global</Word><Word>partial</Word>
+            <Word>where</Word><Word>yield</Word><Word>when</Word><Word>dynamic</Word><Word>unmanaged</Word>
+        </Keywords>
+        <Rule color="MethodCall">\b[A-Za-z_][A-Za-z0-9_]*(?=\s*\()</Rule>
+        <Rule color="TypeNames">\b[A-Z][A-Za-z0-9_]*\b</Rule>
+    </RuleSet>
+</SyntaxDefinition>

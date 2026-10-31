@@ -1,0 +1,96 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <sys:String x:Key="App_Title">Obfuscar</sys:String>
+    <sys:String x:Key="App_Subtitle">assembly obfuscation workbench</sys:String>
+
+    <sys:String x:Key="Tool_Obfuscate">Obfuscate</sys:String>
+    <sys:String x:Key="Tool_RevealOutput">Reveal output</sys:String>
+    <sys:String x:Key="Tool_OpenProject">Open project…</sys:String>
+    <sys:String x:Key="Tool_SaveProject">Save project…</sys:String>
+
+    <sys:String x:Key="Sec_Modules">MODULES</sys:String>
+    <sys:String x:Key="Sec_Rename">RENAME</sys:String>
+    <sys:String x:Key="Sec_Strings">STRINGS / IL</sys:String>
+    <sys:String x:Key="Sec_Bait">BAIT</sys:String>
+    <sys:String x:Key="Sec_ControlFlow">CONTROL FLOW</sys:String>
+    <sys:String x:Key="Sec_Log">LOG</sys:String>
+
+    <sys:String x:Key="Lbl_InputDir">Input dir</sys:String>
+    <sys:String x:Key="Lbl_OutputDir">Output dir</sys:String>
+    <sys:String x:Key="Lbl_CustomChars">Custom chars</sys:String>
+    <sys:String x:Key="Lbl_TypeCount">Type count</sys:String>
+    <sys:String x:Key="Lbl_MethodsPerType">Methods / type</sys:String>
+    <sys:String x:Key="Lbl_FieldsPerType">Fields / type</sys:String>
+    <sys:String x:Key="Lbl_Seed">Seed</sys:String>
+    <sys:String x:Key="Lbl_StringEncoding">String encoding</sys:String>
+    <sys:String x:Key="Lbl_WordList">Extra word list (semicolon separated)</sys:String>
+    <sys:String x:Key="Lbl_MinInstructions">Min instructions</sys:String>
+
+    <!-- option labels (map 1:1 to Obfuscar Var names) -->
+    <sys:String x:Key="Opt_RenameFields">Rename fields</sys:String>
+    <sys:String x:Key="Opt_RenameProperties">Rename properties</sys:String>
+    <sys:String x:Key="Opt_RenameEvents">Rename events</sys:String>
+    <sys:String x:Key="Opt_KeepProperties">Keep properties</sys:String>
+    <sys:String x:Key="Opt_KeepPublicApi">Keep public API</sys:String>
+    <sys:String x:Key="Opt_HidePrivateApi">Hide private API</sys:String>
+    <sys:String x:Key="Opt_ReuseNames">Reuse names</sys:String>
+    <sys:String x:Key="Opt_UseUnicodeNames">Unicode names</sys:String>
+    <sys:String x:Key="Opt_UseKoreanNames">Korean names</sys:String>
+    <sys:String x:Key="Opt_MarkedOnly">Marked only</sys:String>
+    <sys:String x:Key="Opt_HideStrings">Hide strings</sys:String>
+    <sys:String x:Key="Opt_OptimizeMethods">Optimize methods</sys:String>
+    <sys:String x:Key="Opt_SuppressIldasm">Suppress ILDASM</sys:String>
+    <sys:String x:Key="Opt_RegenDebugInfo">Regen debug info</sys:String>
+    <sys:String x:Key="Opt_XmlMapping">XML mapping</sys:String>
+    <sys:String x:Key="Opt_AnalyzeXaml">Analyze XAML</sys:String>
+    <sys:String x:Key="Opt_SkipGenerated">Skip generated</sys:String>
+    <sys:String x:Key="Opt_SkipSpecialName">Skip special names</sys:String>
+    <sys:String x:Key="Opt_InjectBait">Inject bait</sys:String>
+    <sys:String x:Key="Opt_BaitSensitive">Sensitive bait</sys:String>
+    <sys:String x:Key="Opt_BaitIntoMethods">Bait into methods</sys:String>
+    <sys:String x:Key="Opt_FlattenControlFlow">Flatten control flow</sys:String>
+
+    <sys:String x:Key="Btn_Copy">Copy</sys:String>
+    <sys:String x:Key="Btn_Clear">Clear</sys:String>
+    <sys:String x:Key="Btn_Wrap">Wrap</sys:String>
+    <sys:String x:Key="Log_Empty">No output yet</sys:String>
+
+    <sys:String x:Key="Pane_Original">Original</sys:String>
+    <sys:String x:Key="Pane_Obfuscated">Obfuscated</sys:String>
+    <sys:String x:Key="Empty_Select">Select an assembly to preview its decompiled source</sys:String>
+    <sys:String x:Key="Empty_NotObfuscated">Not obfuscated yet - run to produce</sys:String>
+    <sys:String x:Key="Empty_RunToCompare">Run obfuscation to compare the output here</sys:String>
+
+    <sys:String x:Key="Status_Ready">Ready - add .NET assemblies to preview and obfuscate.</sys:String>
+    <sys:String x:Key="Status_NoModules">Add at least one module first.</sys:String>
+    <sys:String x:Key="Status_Obfuscating">Obfuscating {0} module(s)…</sys:String>
+    <sys:String x:Key="Status_Done">Done - output written to {0}</sys:String>
+    <sys:String x:Key="Status_Failed">Failed: {0}</sys:String>
+    <sys:String x:Key="Status_OutputMissing">Output directory does not exist yet.</sys:String>
+    <sys:String x:Key="Status_Loaded">Loaded {0}</sys:String>
+    <sys:String x:Key="Status_LoadFailed">Failed to load project: {0}</sys:String>
+    <sys:String x:Key="Status_Saved">Saved {0}</sys:String>
+    <sys:String x:Key="Status_SaveFailed">Failed to save project: {0}</sys:String>
+
+    <sys:String x:Key="State_Running">running…</sys:String>
+    <sys:String x:Key="State_Done">done</sys:String>
+    <sys:String x:Key="State_Failed">failed</sys:String>
+
+    <sys:String x:Key="Count_Module">{0} module</sys:String>
+    <sys:String x:Key="Count_Modules">{0} modules</sys:String>
+
+    <sys:String x:Key="Log_ProjectWritten">project written to {0}</sys:String>
+
+    <sys:String x:Key="Tip_Minimize">Minimize</sys:String>
+    <sys:String x:Key="Tip_Maximize">Maximize</sys:String>
+    <sys:String x:Key="Tip_Close">Close</sys:String>
+    <sys:String x:Key="Tip_AddAssemblies">Add assemblies…</sys:String>
+    <sys:String x:Key="Tip_RemoveSelected">Remove selected</sys:String>
+    <sys:String x:Key="Tip_Run">Run obfuscation (F5)</sys:String>
+    <sys:String x:Key="Tip_OpenProject">Load a .obfuscar project file</sys:String>
+    <sys:String x:Key="Tip_SaveProject">Save current setup as a .obfuscar project file</sys:String>
+    <sys:String x:Key="Tip_Language">Language</sys:String>
+
+</ResourceDictionary>

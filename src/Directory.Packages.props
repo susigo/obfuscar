@@ -19,5 +19,7 @@
     <PackageVersion Include="xunit.v3.assert" Version="3.2.1" />
     <PackageVersion Include="NuGet.Packaging" Version="7.0.0" />
     <PackageVersion Include="LeXtudio.Metadata.Mutable" Version="0.9.12" />
+    <PackageVersion Include="AvalonEdit" Version="6.3.1.120" />
+    <PackageVersion Include="ICSharpCode.Decompiler" Version="9.1.0.7988" />
   </ItemGroup>
 </Project>

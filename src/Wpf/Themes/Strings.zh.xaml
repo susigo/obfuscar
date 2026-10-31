@@ -1,0 +1,96 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <sys:String x:Key="App_Title">Obfuscar 混淆器</sys:String>
+    <sys:String x:Key="App_Subtitle">程序集混淆工作台</sys:String>
+
+    <sys:String x:Key="Tool_Obfuscate">开始混淆</sys:String>
+    <sys:String x:Key="Tool_RevealOutput">打开输出目录</sys:String>
+    <sys:String x:Key="Tool_OpenProject">打开工程…</sys:String>
+    <sys:String x:Key="Tool_SaveProject">保存工程…</sys:String>
+
+    <sys:String x:Key="Sec_Modules">程序集</sys:String>
+    <sys:String x:Key="Sec_Rename">重命名</sys:String>
+    <sys:String x:Key="Sec_Strings">字符串 / IL</sys:String>
+    <sys:String x:Key="Sec_Bait">诱饵注入</sys:String>
+    <sys:String x:Key="Sec_ControlFlow">控制流</sys:String>
+    <sys:String x:Key="Sec_Log">日志</sys:String>
+
+    <sys:String x:Key="Lbl_InputDir">输入目录</sys:String>
+    <sys:String x:Key="Lbl_OutputDir">输出目录</sys:String>
+    <sys:String x:Key="Lbl_CustomChars">自定义字符</sys:String>
+    <sys:String x:Key="Lbl_TypeCount">类型数量</sys:String>
+    <sys:String x:Key="Lbl_MethodsPerType">每类型方法数</sys:String>
+    <sys:String x:Key="Lbl_FieldsPerType">每类型字段数</sys:String>
+    <sys:String x:Key="Lbl_Seed">随机种子</sys:String>
+    <sys:String x:Key="Lbl_StringEncoding">字符串编码</sys:String>
+    <sys:String x:Key="Lbl_WordList">附加词表（分号分隔）</sys:String>
+    <sys:String x:Key="Lbl_MinInstructions">最小指令数</sys:String>
+
+    <!-- option labels (map 1:1 to Obfuscar Var names) -->
+    <sys:String x:Key="Opt_RenameFields">重命名字段</sys:String>
+    <sys:String x:Key="Opt_RenameProperties">重命名属性</sys:String>
+    <sys:String x:Key="Opt_RenameEvents">重命名事件</sys:String>
+    <sys:String x:Key="Opt_KeepProperties">保留属性</sys:String>
+    <sys:String x:Key="Opt_KeepPublicApi">保留公共 API</sys:String>
+    <sys:String x:Key="Opt_HidePrivateApi">隐藏私有 API</sys:String>
+    <sys:String x:Key="Opt_ReuseNames">复用名称</sys:String>
+    <sys:String x:Key="Opt_UseUnicodeNames">使用 Unicode 名称</sys:String>
+    <sys:String x:Key="Opt_UseKoreanNames">使用韩文名称</sys:String>
+    <sys:String x:Key="Opt_MarkedOnly">仅处理标记项</sys:String>
+    <sys:String x:Key="Opt_HideStrings">隐藏字符串</sys:String>
+    <sys:String x:Key="Opt_OptimizeMethods">优化方法</sys:String>
+    <sys:String x:Key="Opt_SuppressIldasm">抑制 ILDASM</sys:String>
+    <sys:String x:Key="Opt_RegenDebugInfo">重建调试信息</sys:String>
+    <sys:String x:Key="Opt_XmlMapping">XML 映射</sys:String>
+    <sys:String x:Key="Opt_AnalyzeXaml">分析 XAML</sys:String>
+    <sys:String x:Key="Opt_SkipGenerated">跳过生成代码</sys:String>
+    <sys:String x:Key="Opt_SkipSpecialName">跳过特殊名称</sys:String>
+    <sys:String x:Key="Opt_InjectBait">注入诱饵</sys:String>
+    <sys:String x:Key="Opt_BaitSensitive">敏感词诱饵</sys:String>
+    <sys:String x:Key="Opt_BaitIntoMethods">注入到真实方法</sys:String>
+    <sys:String x:Key="Opt_FlattenControlFlow">控制流平坦化</sys:String>
+
+    <sys:String x:Key="Btn_Copy">复制</sys:String>
+    <sys:String x:Key="Btn_Clear">清空</sys:String>
+    <sys:String x:Key="Btn_Wrap">自动换行</sys:String>
+    <sys:String x:Key="Log_Empty">暂无输出</sys:String>
+
+    <sys:String x:Key="Pane_Original">原始</sys:String>
+    <sys:String x:Key="Pane_Obfuscated">混淆后</sys:String>
+    <sys:String x:Key="Empty_Select">选择一个程序集以预览其反编译源码</sys:String>
+    <sys:String x:Key="Empty_NotObfuscated">尚未混淆 —— 运行后生成</sys:String>
+    <sys:String x:Key="Empty_RunToCompare">运行混淆后在此对比输出</sys:String>
+
+    <sys:String x:Key="Status_Ready">就绪 —— 添加 .NET 程序集以预览和混淆。</sys:String>
+    <sys:String x:Key="Status_NoModules">请先添加至少一个程序集。</sys:String>
+    <sys:String x:Key="Status_Obfuscating">正在混淆 {0} 个程序集…</sys:String>
+    <sys:String x:Key="Status_Done">完成 —— 输出已写入 {0}</sys:String>
+    <sys:String x:Key="Status_Failed">失败：{0}</sys:String>
+    <sys:String x:Key="Status_OutputMissing">输出目录尚不存在。</sys:String>
+    <sys:String x:Key="Status_Loaded">已加载 {0}</sys:String>
+    <sys:String x:Key="Status_LoadFailed">加载工程失败：{0}</sys:String>
+    <sys:String x:Key="Status_Saved">已保存 {0}</sys:String>
+    <sys:String x:Key="Status_SaveFailed">保存工程失败：{0}</sys:String>
+
+    <sys:String x:Key="State_Running">运行中…</sys:String>
+    <sys:String x:Key="State_Done">完成</sys:String>
+    <sys:String x:Key="State_Failed">失败</sys:String>
+
+    <sys:String x:Key="Count_Module">{0} 个程序集</sys:String>
+    <sys:String x:Key="Count_Modules">{0} 个程序集</sys:String>
+
+    <sys:String x:Key="Log_ProjectWritten">工程已写入 {0}</sys:String>
+
+    <sys:String x:Key="Tip_Minimize">最小化</sys:String>
+    <sys:String x:Key="Tip_Maximize">最大化</sys:String>
+    <sys:String x:Key="Tip_Close">关闭</sys:String>
+    <sys:String x:Key="Tip_AddAssemblies">添加程序集…</sys:String>
+    <sys:String x:Key="Tip_RemoveSelected">移除选中项</sys:String>
+    <sys:String x:Key="Tip_Run">运行混淆（F5）</sys:String>
+    <sys:String x:Key="Tip_OpenProject">加载 .obfuscar 工程文件</sys:String>
+    <sys:String x:Key="Tip_SaveProject">将当前配置保存为 .obfuscar 工程文件</sys:String>
+    <sys:String x:Key="Tip_Language">语言</sys:String>
+
+</ResourceDictionary>
