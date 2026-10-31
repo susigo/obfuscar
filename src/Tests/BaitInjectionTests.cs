@@ -310,6 +310,52 @@ namespace ObfuscarTests
         }
 
         [Fact]
+        public void CheckSensitiveTripwireCategories()
+        {
+            string outputPath = TestHelper.OutputPath;
+            var xml = string.Format(
+                @"<?xml version='1.0'?>" +
+                @"<Obfuscator>" +
+                @"<Var name='InPath' value='{0}' />" +
+                @"<Var name='OutPath' value='{1}' />" +
+                @"<Var name='HideStrings' value='false' />" +
+                @"<Var name='InjectBait' value='true' />" +
+                @"<Var name='BaitTypeCount' value='80' />" +
+                @"<Var name='BaitMethodsPerType' value='8' />" +
+                @"<Var name='BaitSeed' value='2024' />" +
+                @"<Var name='BaitSensitive' value='true' />" +
+                @"<Module file='{0}{2}AssemblyWithStrings.dll' />" +
+                @"</Obfuscator>",
+                TestHelper.InputPath, outputPath, Path.DirectorySeparatorChar);
+
+            TestHelper.BuildAndObfuscate("AssemblyWithStrings", string.Empty,
+                xml, false, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp7);
+
+            var assmDef = AssemblyDefinition.ReadAssembly(
+                Path.Combine(outputPath, "AssemblyWithStrings.dll"));
+
+            var allStrings = new List<string>();
+            foreach (var method in GetBaitTypes(assmDef).SelectMany(t => t.Methods))
+            {
+                if (method.Body == null)
+                    continue;
+                foreach (var instr in method.Body.Instructions)
+                {
+                    if (instr.OpCode == OpCodes.Ldstr && instr.Operand is string s)
+                        allStrings.Add(s);
+                }
+            }
+
+            Assert.Contains(allStrings, s =>
+                s.Contains("Biological Weapons Convention") || s.Contains("BWC"));
+            Assert.Contains(allStrings, s =>
+                s.Contains("terrorism") || s.Contains("TERRORISM") || s.Contains("OFAC"));
+            Assert.Contains(allStrings, s =>
+                s.Contains("MINOR PROTECTION") || s.Contains("COPPA") ||
+                s.Contains("CHILD SAFETY"));
+        }
+
+        [Fact]
         public void CheckBaitNamesSurviveRenaming()
         {
             string outputPath = TestHelper.OutputPath;

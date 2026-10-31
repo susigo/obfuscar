@@ -26,11 +26,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using LeXtudio.Metadata.Mutable;
 using AssemblyDefinition = LeXtudio.Metadata.Mutable.MutableAssemblyDefinition;
 using Instruction = LeXtudio.Metadata.Mutable.MutableInstruction;
 using MethodDefinition = LeXtudio.Metadata.Mutable.MutableMethodDefinition;
+using MethodReference = LeXtudio.Metadata.Mutable.MutableMethodReference;
 using OpCodes = LeXtudio.Metadata.Mutable.MutableOpCodes;
 using TypeDefinition = LeXtudio.Metadata.Mutable.MutableTypeDefinition;
 using VariableDefinition = LeXtudio.Metadata.Mutable.MutableVariableDefinition;
@@ -127,9 +129,28 @@ namespace Obfuscar
             if (blocks.Count < 2)
                 return;
 
+            // Every "br loopStart" must execute at a consistent stack depth
+            // (0), which holds only when all basic blocks start empty. Methods
+            // with mid-expression jump targets (dup/??/?: patterns, bait guards
+            // woven into expressions) are left alone.
+            var depths = ComputeStackDepths(originalInstructions);
+            if (depths == null)
+                return;
+
+            foreach (var block in blocks)
+            {
+                if (depths[block.StartIndex] != 0)
+                    return;
+            }
+
             AssignStateValues(blocks);
 
-            var stateVar = new VariableDefinition(module.TypeSystem.Int32);
+            // MutableVariableDefinition.Index is written verbatim into ldloc/
+            // stloc operands; leaving it 0 would alias the first user local.
+            var stateVar = new VariableDefinition(module.TypeSystem.Int32)
+            {
+                Index = method.Body.Variables.Count
+            };
             method.Body.Variables.Add(stateVar);
             method.Body.InitLocals = true;
 
@@ -148,11 +169,11 @@ namespace Obfuscar
             worker.Emit(OpCodes.Xor);
 
             var switchTargets = new Instruction[blocks.Count];
-            for (int i = 0; i < blocks.Count; i++)
+            foreach (var block in blocks)
             {
                 var nop = worker.Create(OpCodes.Nop);
-                blocks[i].Label = nop;
-                switchTargets[i] = nop;
+                block.Label = nop;
+                switchTargets[block.StateValue] = nop;
             }
 
             worker.Append(worker.Create(OpCodes.Switch, switchTargets));
@@ -202,6 +223,230 @@ namespace Obfuscar
 
             if (method.Body.MaxStackSize < 16)
                 method.Body.MaxStackSize = 16;
+        }
+
+        /// <summary>
+        /// Propagates evaluation-stack depth through the control flow graph
+        /// starting at 0. Returns null for instructions whose delta cannot be
+        /// determined or for inconsistent IL (two predecessors disagreeing on
+        /// a target's depth).
+        /// </summary>
+        private static int[] ComputeStackDepths(List<Instruction> instructions)
+        {
+            var indexOf = new Dictionary<Instruction, int>();
+            for (int i = 0; i < instructions.Count; i++)
+                indexOf[instructions[i]] = i;
+
+            var depths = new int[instructions.Count];
+            for (int i = 0; i < depths.Length; i++)
+                depths[i] = -1;
+
+            var pending = new Stack<int>();
+            depths[0] = 0;
+            pending.Push(0);
+
+            while (pending.Count > 0)
+            {
+                int i = pending.Pop();
+                int? delta = GetStackDelta(instructions[i]);
+                if (delta == null || !BranchOperandResolvable(instructions[i], indexOf))
+                    return null;
+
+                int nextDepth = depths[i] + delta.Value;
+                if (nextDepth < 0)
+                    return null;
+
+                foreach (int s in Successors(instructions, i, indexOf))
+                {
+                    if (depths[s] == -1)
+                    {
+                        depths[s] = nextDepth;
+                        pending.Push(s);
+                    }
+                    else if (depths[s] != nextDepth)
+                    {
+                        return null;
+                    }
+                }
+            }
+
+            return depths;
+        }
+
+        // A branch whose operand does not point inside this method would emit a
+        // wrong state transition, so the method is skipped entirely.
+        private static bool BranchOperandResolvable(Instruction instr,
+            Dictionary<Instruction, int> indexOf)
+        {
+            var flow = instr.OpCode.FlowControl;
+            if (flow != MutableFlowControl.Branch && flow != MutableFlowControl.Cond_Branch)
+                return true;
+
+            if (instr.Operand is Instruction target)
+                return indexOf.ContainsKey(target);
+
+            if (instr.Operand is Instruction[] targets)
+            {
+                foreach (var t in targets)
+                    if (!indexOf.ContainsKey(t))
+                        return false;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static IEnumerable<int> Successors(List<Instruction> instructions, int i,
+            Dictionary<Instruction, int> indexOf)
+        {
+            var instr = instructions[i];
+            var flow = instr.OpCode.FlowControl;
+
+            if (flow == MutableFlowControl.Branch)
+            {
+                if (instr.Operand is Instruction target && indexOf.TryGetValue(target, out int t))
+                    yield return t;
+                yield break;
+            }
+
+            if (flow == MutableFlowControl.Cond_Branch)
+            {
+                if (instr.Operand is Instruction condTarget && indexOf.TryGetValue(condTarget, out int t))
+                    yield return t;
+                else if (instr.Operand is Instruction[] targets)
+                    foreach (var target in targets)
+                        if (indexOf.TryGetValue(target, out int ti))
+                            yield return ti;
+            }
+
+            if (flow != MutableFlowControl.Return && flow != MutableFlowControl.Throw &&
+                i + 1 < instructions.Count)
+                yield return i + 1;
+        }
+
+        // Maps MutableOpCode values to System.Reflection.Emit.OpCode for its
+        // StackBehaviour tables; only call/callvirt/calli/newobj/ret need
+        // operand-specific handling.
+        private static readonly Dictionary<short, System.Reflection.Emit.OpCode> FrameworkOpCodes =
+            BuildFrameworkOpCodeMap();
+
+        private static Dictionary<short, System.Reflection.Emit.OpCode> BuildFrameworkOpCodeMap()
+        {
+            var map = new Dictionary<short, System.Reflection.Emit.OpCode>();
+            foreach (var field in typeof(System.Reflection.Emit.OpCodes).GetFields(
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static))
+            {
+                if (field.GetValue(null) is System.Reflection.Emit.OpCode op &&
+                    !map.ContainsKey((short)op.Value))
+                    map.Add((short)op.Value, op);
+            }
+            return map;
+        }
+
+        private static int? GetStackDelta(Instruction instr)
+        {
+            if (!FrameworkOpCodes.TryGetValue(instr.OpCode.Value, out var op))
+                return null;
+
+            switch (instr.OpCode.Name)
+            {
+                // Exception-region control flow cannot appear in the methods we
+                // flatten, and leave/jmp abandon rather than fall through.
+                case "leave":
+                case "leave.s":
+                case "endfinally":
+                case "endfault":
+                case "endfilter":
+                case "rethrow":
+                case "jmp":
+                    return null;
+            }
+
+            int pop = FixedPopCount(op.StackBehaviourPop);
+            int push = FixedPushCount(op.StackBehaviourPush);
+            if (pop >= 0 && push >= 0)
+                return push - pop;
+
+            switch (instr.OpCode.Name)
+            {
+                case "call":
+                case "callvirt":
+                case "newobj":
+                    return CallDelta(instr);
+                case "ret":
+                    // No successors, so the delta is never applied.
+                    return 0;
+                default:
+                    // calli and jmp signatures cannot be resolved here.
+                    return null;
+            }
+        }
+
+        private static int? CallDelta(Instruction instr)
+        {
+            if (!(instr.Operand is MethodReference mr))
+                return null;
+
+            int pop = mr.Parameters.Count;
+            if (instr.OpCode.Name == "callvirt" ||
+                (instr.OpCode.Name == "call" && mr.HasThis))
+                pop += 1;
+
+            bool pushesResult = instr.OpCode.Name == "newobj" ||
+                                !(mr.ReturnType == null ||
+                                  mr.ReturnType.FullName == "System.Void");
+            return (pushesResult ? 1 : 0) - pop;
+        }
+
+        private static int FixedPopCount(System.Reflection.Emit.StackBehaviour behaviour)
+        {
+            switch (behaviour)
+            {
+                case System.Reflection.Emit.StackBehaviour.Pop0:
+                    return 0;
+                case System.Reflection.Emit.StackBehaviour.Pop1:
+                case System.Reflection.Emit.StackBehaviour.Popi:
+                case System.Reflection.Emit.StackBehaviour.Popref:
+                    return 1;
+                case System.Reflection.Emit.StackBehaviour.Pop1_pop1:
+                case System.Reflection.Emit.StackBehaviour.Popi_pop1:
+                case System.Reflection.Emit.StackBehaviour.Popi_popi:
+                case System.Reflection.Emit.StackBehaviour.Popi_popi8:
+                case System.Reflection.Emit.StackBehaviour.Popi_popr4:
+                case System.Reflection.Emit.StackBehaviour.Popi_popr8:
+                case System.Reflection.Emit.StackBehaviour.Popref_pop1:
+                case System.Reflection.Emit.StackBehaviour.Popref_popi:
+                    return 2;
+                case System.Reflection.Emit.StackBehaviour.Popi_popi_popi:
+                case System.Reflection.Emit.StackBehaviour.Popref_popi_popi:
+                case System.Reflection.Emit.StackBehaviour.Popref_popi_popi8:
+                case System.Reflection.Emit.StackBehaviour.Popref_popi_popr4:
+                case System.Reflection.Emit.StackBehaviour.Popref_popi_popr8:
+                case System.Reflection.Emit.StackBehaviour.Popref_popi_popref:
+                    return 3;
+                default:
+                    return -1;
+            }
+        }
+
+        private static int FixedPushCount(System.Reflection.Emit.StackBehaviour behaviour)
+        {
+            switch (behaviour)
+            {
+                case System.Reflection.Emit.StackBehaviour.Push0:
+                    return 0;
+                case System.Reflection.Emit.StackBehaviour.Push1:
+                case System.Reflection.Emit.StackBehaviour.Pushi:
+                case System.Reflection.Emit.StackBehaviour.Pushi8:
+                case System.Reflection.Emit.StackBehaviour.Pushr4:
+                case System.Reflection.Emit.StackBehaviour.Pushr8:
+                case System.Reflection.Emit.StackBehaviour.Pushref:
+                    return 1;
+                case System.Reflection.Emit.StackBehaviour.Push1_push1:
+                    return 2;
+                default:
+                    return -1;
+            }
         }
 
         private List<BasicBlock> IdentifyBasicBlocks(List<Instruction> instructions)
@@ -259,15 +504,19 @@ namespace Obfuscar
             return blocks;
         }
 
+        // State values must be exactly 0..n-1: the dispatcher is a switch and
+        // out-of-range indices fall through to the default arm, which jumps back
+        // to loopStart and would spin forever.
         private void AssignStateValues(List<BasicBlock> blocks)
         {
-            var used = new HashSet<int>();
-            foreach (var block in blocks)
+            var values = Enumerable.Range(0, blocks.Count).ToList();
+            for (int i = values.Count - 1; i > 0; i--)
             {
-                int sv;
-                do { sv = _rng.Next(0, blocks.Count * 4); } while (!used.Add(sv));
-                block.StateValue = sv;
+                int j = _rng.Next(i + 1);
+                (values[i], values[j]) = (values[j], values[i]);
             }
+            for (int i = 0; i < blocks.Count; i++)
+                blocks[i].StateValue = values[i];
         }
 
         private static Dictionary<Instruction, int> BuildBranchTargetMap(

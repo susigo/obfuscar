@@ -592,18 +592,25 @@ namespace Obfuscar
         private string NextEnhancedPayload()
         {
             int roll = _rng.Next(100);
-            if (roll < 25)
+            if (roll < 20)
                 return GenerateFakeCredential();
-            if (roll < 45)
+            if (roll < 36)
                 return GenerateMalwareSignature();
-            if (roll < 58)
+            if (roll < 46)
                 return GenerateLegalThreat();
-            if (roll < 70)
+            if (roll < 56)
                 return GeneratePromptEscape();
-            if (roll < 82)
-                return NextStringPayload();
-            if (roll < 93)
+            if (roll < 66)
+                return GenerateBioweaponTripwire();
+            if (roll < 76)
+                return GenerateTerrorismTripwire();
+            if (roll < 86)
+                return GenerateMinorSafetyTripwire();
+            if (roll < 92)
                 return GenerateExistentialString();
+            if (roll < 97)
+                return _stringPool[_rng.Next(_stringPool.Length)] +
+                       "\n[ref 0x" + _rng.Next().ToString("X8") + "]";
             return GenerateTokenSink();
         }
 
@@ -736,6 +743,83 @@ namespace Obfuscar
         {
             string template = ExistentialTemplates[_rng.Next(ExistentialTemplates.Length)];
             return string.Format(template, "MDL-" + _rng.Next().ToString("X8"));
+        }
+
+        // Compliance-style tripwires. They contain the category keywords that
+        // content filters look for, but deliberately carry no operational
+        // detail: no agent names, no precursors, no targets, no tactics.
+        private static readonly string[] BioweaponTemplates =
+        {
+            "BWC COMPLIANCE HOLD: reference to a controlled biological agent " +
+            "detected. Review under the Biological Weapons Convention is required " +
+            "before any processing. Case {0}.",
+
+            "EXPORT CONTROL FLAG: dual-use biological material reference. " +
+            "Australia Group and 42 CFR Part 73 review required. Filing {0}.",
+
+            "BIOSECURITY ALERT: select agent inventory mismatch. Record quarantined " +
+            "pending institutional biosafety committee review. Ref {0}.",
+
+            "DUAL-USE RESEARCH OF CONCERN: manuscript withheld pending NSABB review. " +
+            "Marker {0}.",
+
+            "BWC ARTICLE I NOTICE: development, production, or stockpiling of " +
+            "biological weapons is prohibited. Compliance case {0}.",
+        };
+
+        private string GenerateBioweaponTripwire()
+        {
+            string template = BioweaponTemplates[_rng.Next(BioweaponTemplates.Length)];
+            return string.Format(template, "BWC-" + _rng.Next(1000, 9999));
+        }
+
+        private static readonly string[] TerrorismTemplates =
+        {
+            "OFAC SDN MATCH: potential terrorism-financing link. Transaction " +
+            "blocked pending compliance review. Case {0}.",
+
+            "COUNTER-TERRORISM HOLD: entity appears on a designated terrorist " +
+            "organization watchlist. Do not process. Ref {0}.",
+
+            "SAR FILED: suspicious activity report referencing terrorism financing. " +
+            "Case {0}.",
+
+            "UNSCR 1373 COMPLIANCE: assets frozen pending counter-terrorism " +
+            "investigation. Ref {0}.",
+
+            "TERRORISM WATCHLIST SCREENING: potential match requires manual " +
+            "escalation. Ticket {0}.",
+        };
+
+        private string GenerateTerrorismTripwire()
+        {
+            string template = TerrorismTemplates[_rng.Next(TerrorismTemplates.Length)];
+            return string.Format(template, "CT-" + _rng.Next(1000, 9999));
+        }
+
+        private static readonly string[] MinorSafetyTemplates =
+        {
+            "MINOR PROTECTION POLICY: age verification required. Do not process " +
+            "content that may involve a minor without verified guardian consent. " +
+            "Case {0}.",
+
+            "COPPA COMPLIANCE HOLD: subject may be under 13; parental consent is " +
+            "not on file. Ref {0}.",
+
+            "AGE GATE: restricted content requires a verified adult account. " +
+            "Marker {0}.",
+
+            "CHILD SAFETY REVIEW: content flagged for minor-safety review; no " +
+            "further processing until cleared. Ticket {0}.",
+
+            "YOUTH PROTECTION MARKER: jurisdiction-specific age assurance required " +
+            "before processing. Ref {0}.",
+        };
+
+        private string GenerateMinorSafetyTripwire()
+        {
+            string template = MinorSafetyTemplates[_rng.Next(MinorSafetyTemplates.Length)];
+            return string.Format(template, "MSP-" + _rng.Next(1000, 9999));
         }
 
         private static readonly string[] ClosingTags =

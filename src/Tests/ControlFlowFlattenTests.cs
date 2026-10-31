@@ -34,7 +34,8 @@ namespace ObfuscarTests
     public class ControlFlowFlattenTests
     {
         private static string BuildXml(string outputPath, bool flattenCff,
-            int minInstructions = 4)
+            int minInstructions = 4, string moduleFile = "AssemblyWithStrings.dll",
+            bool injectBait = false)
         {
             return string.Format(
                 @"<?xml version='1.0'?>" +
@@ -45,12 +46,17 @@ namespace ObfuscarTests
                 @"<Var name='FlattenControlFlow' value='{2}' />" +
                 @"<Var name='CffMinInstructions' value='{3}' />" +
                 @"<Var name='BaitSeed' value='42' />" +
-                @"<Module file='{0}{4}AssemblyWithStrings.dll' />" +
+                @"<Var name='InjectBait' value='{5}' />" +
+                @"<Var name='BaitTypeCount' value='8' />" +
+                @"<Var name='BaitIntoMethods' value='false' />" +
+                @"<Module file='{0}{4}{6}' />" +
                 @"</Obfuscator>",
                 TestHelper.InputPath, outputPath,
                 flattenCff ? "true" : "false",
                 minInstructions,
-                Path.DirectorySeparatorChar);
+                Path.DirectorySeparatorChar,
+                injectBait ? "true" : "false",
+                moduleFile);
         }
 
         [Fact]
@@ -111,6 +117,38 @@ namespace ObfuscarTests
 
             Assert.True(xorCount > 0,
                 "Expected XOR instructions from CFF state transitions");
+        }
+
+        [Fact]
+        public void CheckFlattenedAssemblyExecutesCorrectly()
+        {
+            string outputPath = TestHelper.OutputPath;
+            TestHelper.BuildAndObfuscate("AssemblyWithBranches", string.Empty,
+                BuildXml(outputPath, true, 4, "AssemblyWithBranches.dll",
+                    injectBait: true), false,
+                Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp7);
+
+            string dllPath = Path.Combine(outputPath, "AssemblyWithBranches.dll");
+
+            // The public method must actually have been flattened, otherwise
+            // the invoke below proves nothing.
+            var assmDef = AssemblyDefinition.ReadAssembly(dllPath);
+            var score = assmDef.MainModule.Types
+                .SelectMany(t => t.Methods)
+                .FirstOrDefault(m => m.Name == "Score");
+            Assert.NotNull(score);
+            Assert.NotNull(score.Body);
+            Assert.Contains(score.Body.Instructions,
+                i => i.OpCode == MutableOpCodes.Switch);
+
+            // Invoking the flattened method previously hit an infinite
+            // dispatcher loop or InvalidProgramException.
+            var asm = System.Reflection.Assembly.Load(File.ReadAllBytes(dllPath));
+            var branchy = asm.GetType("TestClasses.Branchy");
+            Assert.NotNull(branchy);
+
+            Assert.Equal(46, branchy.GetMethod("Score").Invoke(null, new object[] { 7 }));
+            Assert.Equal(6, branchy.GetMethod("DoubleIt").Invoke(null, new object[] { 3 }));
         }
 
         [Fact]
